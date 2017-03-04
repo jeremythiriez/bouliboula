@@ -5,7 +5,7 @@
 // Login   <jeremy@epitech.net>
 //
 // Started on  Tue Feb  7 12:32:01 2017 jeremy thiriez
-// Last update Fri Mar  3 10:53:23 2017 jeremy thiriez
+// Last update Sat Mar  4 17:58:10 2017 jeremy thiriez
 //
 
 #ifndef OUTPUT_HPP_
@@ -18,6 +18,16 @@ namespace nts
 {
   class			Output : public IComponent
   {
+  public:
+    class       Error : public std::exception
+    {
+    private:
+      std::string       _msg;
+    public:
+      Error(std::string const &msg) { _msg = msg;};
+      ~Error() throw() {};
+      char const        *what() const throw() { return _msg.c_str(); }
+    };
   private:
     std::string			name;
     nts::IComponent		*component;

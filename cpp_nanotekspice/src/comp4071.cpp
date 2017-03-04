@@ -5,75 +5,41 @@
 // Login   <jeremy@epitech.net>
 //
 // Started on  Wed Mar  1 16:56:21 2017 jeremy thiriez
-// Last update Fri Mar  3 10:45:31 2017 jeremy thiriez
+// Last update Sat Mar  4 20:28:27 2017 jeremy thiriez
 //
 
 #include <string>
 #include <iostream>
 #include "4071.hpp"
+#include "Input.hpp"
+#include "Output.hpp"
 
-nts::Comp4071::Comp4071()
+nts::Comp4071::Comp4071(std::string const& value) :
+  AComponent("4071" + std::string("-") + value)
 {
-  this->name = "4071";
-  link_inside[3] = std::make_pair(1, 2);
-  link_inside[4] = std::make_pair(5, 6);
-  link_inside[10] = std::make_pair(8, 9);
-  link_inside[11] = std::make_pair(12, 13);
-  for (int i = 0; i < 12; i++)
-    this->pin[i] = NULL;
 }
 
 nts::Tristate		nts::Comp4071::Or(nts::Tristate pin1, nts::Tristate pin2)
 {
-  return (static_cast<nts::Tristate>(static_cast<bool>(pin1) ||
-				     static_cast<bool>(pin2)));
-}
+  int			tmp1;
+  int			tmp2;
 
-nts::Tristate		nts::Comp4071::Compute(size_t pin_num_this)
-{
-  if (pin_num_this == 3 || pin_num_this == 4 ||
-      pin_num_this == 10 || pin_num_this == 11)
-    return (this->OutputValue(pin_num_this));
-  else if (pin_num_this >= 1 && pin_num_this <= 13)
-    return (this->InputValue(pin_num_this));
-  return (nts::UNDEFINED);
-}
-
-void			nts::Comp4071::SetLink(size_t pin_num_this,
-					       nts::IComponent &component,
-					       size_t pin_num_target)
-{
-  if (!this->pin[pin_num_this - 1])
-    {
-      this->inter_link[pin_num_this] = pin_num_target;
-      this->pin[pin_num_this - 1] = &component;
-      component.SetLink(pin_num_target, *this, pin_num_this);
-    }
-}
-
-void			nts::Comp4071::Dump(void) const
-{
-  std::cout << this->name << ": " << std::endl;
-  for (size_t i = 0; i < 12; i++)
-    {
-      if (this->pin[i])
-	{
-	  auto it = this->state_pin.find(i + 1);
-	  std::cout << "pin[" << i + 1 << "] = " << it->second
-		    << std::endl;
-	}
-    }
-}
-
-nts::Tristate		nts::Comp4071::InputValue(size_t input)
-{
-  this->state_pin[input] = this->pin[input - 1]->Compute(this->inter_link[input]);
-  return (this->state_pin[input]);
+  tmp1 = static_cast<int>(pin1);
+  tmp2 = static_cast<int>(pin2);
+  if (tmp1 == -1)
+    tmp1 = 0;
+  if (tmp2 == -1)
+    tmp2 = 0;
+  return (static_cast<nts::Tristate>(tmp1 | tmp2));
 }
 
 nts::Tristate		nts::Comp4071::OutputValue(size_t output)
 {
-  this->state_pin[output] = this->Or(this->InputValue(link_inside[output].first),
-				     this->InputValue(link_inside[output].second));
-  return (this->state_pin[output]);
+  if (this->_link_inside.find(output) == this->_link_inside.end())
+    throw nts::Comp4071::Error("Output does not exist");
+  if (!this->_pin[output - 1])
+    throw nts::Comp4071::Error("Output does not linked");
+  this->_state_pin[output].first = this->Or(this->InputValue(this->_link_inside[output].first),
+				      this->InputValue(this->_link_inside[output].second));
+  return (this->_state_pin[output].first);
 }

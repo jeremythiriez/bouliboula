@@ -5,13 +5,13 @@
 // Login   <jeremy@epitech.net>
 //
 // Started on  Tue Feb  7 12:32:01 2017 jeremy thiriez
-// Last update Fri Mar  3 10:53:09 2017 jeremy thiriez
+// Last update Sun Mar  5 22:57:28 2017 etienne.dewever@epitech.eu
 //
 
 #ifndef INPUT_HPP_
 # define INPUT_HPP_
 
-#include "IComponent.hpp"
+# include "IComponent.hpp"
 
 namespace nts
 {

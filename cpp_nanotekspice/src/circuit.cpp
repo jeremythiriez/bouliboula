@@ -5,11 +5,12 @@
 // Login   <jeremy@epitech.net>
 //
 // Started on  Tue Feb  7 10:16:07 2017 jeremy thiriez
-// Last update Fri Mar  3 10:55:46 2017 jeremy thiriez
+// Last update Sun Mar  5 23:05:51 2017 etienne.dewever@epitech.eu
 //
 
+#include <string>
 #include <iostream>
-#include "IComponent.hpp"
+#include "AComponent.hpp"
 #include "Circuit.hpp"
 #include "Input.hpp"
 #include "4071.hpp"
@@ -18,35 +19,25 @@
 nts::Circuit::Circuit(char **av)
   : _fileName(av[1])
 {
-  std::fstream file(av[1], std::ifstream::in);
-  std::string line;
+  std::fstream		file(av[1], std::ifstream::in);
+  std::string		line;
   t_ast_node		*root;
 
-  _parser = new Parser();
+  this->_parser = new Parser(*this);
   while (getline(file, line))
+    this->_parser->feed(line);
+  root = _parser->createTree();
+  this->_parser->parseTree(*root);
     _parser->feed(line);
-  // root = _parser->createTree();
-  // this->_parser->parseTree(*root);
+    this->clock = false;
   (void)root;
-
-  _input["a"] = new Input("a");
-  _input["b"] = new Input("b");
-  _output["c"] = new Output("c");
-  _component["4071"] = new Comp4071;
-
-  _component["4071"]->SetLink(1, *_input["a"], 1);
-  _component["4071"]->SetLink(2, *_input["b"], 1);
-  _component["4071"]->SetLink(3, *_output["c"], 1);
-
-  _input["a"]->setValue(nts::TRUE);
-  _input["b"]->setValue(nts::TRUE);
-
 }
 
 nts::Tristate			nts::Circuit::Compute(size_t pin_num_this)
 {
   (void)pin_num_this;
-  for (auto e : this->_output)
+  this->clock = !this->clock;
+  for (auto &e : this->_output)
     e.second->Compute();
   return (nts::TRUE);
 }
@@ -63,16 +54,16 @@ void				nts::Circuit::SetLink(size_t pin_num_this,
 void				nts::Circuit::Dump(void) const
 {
   std::cout << "Circuit:" << std::endl;
-  for (auto e : this->_input)
+  for (auto &e : this->_input)
     e.second->Dump();
-  for (auto e : this->_output)
+  for (auto &e : this->_output)
     e.second->Dump();
 }
 
 void				nts::Circuit::DumpOutput(void) const
 {
-  for (auto e : this->_output)
-    std::cout << e.first << " = " << e.second->Compute() << std::endl;
+  for (auto &e : this->_output)
+    e.second->Dump();
 }
 
 nts::Parser				*nts::Circuit::getParser() const
@@ -92,5 +83,36 @@ std::unordered_map<std::string, nts::Output*>	nts::Circuit::getOutput() const
 
 std::unordered_map<std::string, nts::IComponent*>	nts::Circuit::getComponent() const
 {
-  return this->_component;
+  return this->_components;
+}
+
+nts::Relevant const				&nts::Circuit::getFactory() const
+{
+  return (this->_factory);
+}
+
+void					nts::Circuit::addElement(std::string const &type,
+								 std::string const &name)
+{
+  IComponent				*element;
+  AComponent				*cast;
+
+  element = this->_factory.createComponent(type, name);
+  if ((cast = dynamic_cast<nts::AComponent*>(element)) != NULL)
+    cast->clock = &this->clock;
+  if (type == "input")
+    this->_input[name] = static_cast<Input *>(element);
+  else if (type == "output")
+    this->_output[name] = static_cast<Output *>(element);
+  else
+    this->_components[name] = element;
+ }
+
+nts::IComponent				*nts::Circuit::searchComponent(std::string const &name)
+{
+  if (this->getInput().find(name) != this->getInput().end())
+    return this->getInput()[name];
+  if (this->getOutput().find(name) != this->getOutput().end())
+    return this->getOutput()[name];
+  return this->getComponent()[name];
 }

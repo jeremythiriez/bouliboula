@@ -5,7 +5,7 @@
 // Login   <jeremy@epitech.net>
 //
 // Started on  Mon Feb  6 19:01:45 2017 jeremy thiriez
-// Last update Fri Mar  3 09:07:45 2017 jeremy thiriez
+// Last update Sun Mar  5 02:38:27 2017 etienne.dewever@epitech.eu
 //
 
 #include <iostream>
@@ -16,11 +16,7 @@
 
 int		main(int ac, char **av)
 {
-
-  (void)ac;
-  (void)av;
-
-  nts::NanoTekSpice nano(av);
+  nts::NanoTekSpice nano(av, ac);
 
   nano.execution();
 
